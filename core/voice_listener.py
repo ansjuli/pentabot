@@ -1,46 +1,51 @@
-import sounddevice as sd
-import queue
-import json
-from core.command_executor import execute_command
-from core.whisper_fallback import transcribe_audio
-from vosk import Model, KaldiRecognizer
+# listener.py – Optional fallback listener
+import speech_recognition as sr
+from core.router import route
+from core.tts import speak
+import re
+import time
 
-q = queue.Queue()
-last_audio = b""
+EXIT_WORDS = ["exit", "quit", "stop"]
 
-# Load commands
-with open("commands.json", "r", encoding="utf-8") as f:
-    COMMANDS = json.load(f)
+def clean_text(text):
+    # basic filler removal
+    fillers = ["uh", "um", "ah", "hmm", "like", "so", "well"]
+    for f in fillers:
+        text = text.replace(f, "")
+    text = re.sub(r'\s+', " ", text).strip()
+    return text.lower()
 
-model = Model("models/vosk-model-small-en-us-0.15")
-recognizer = KaldiRecognizer(model, 16000)
+def fallback_listen():
+    r = sr.Recognizer()
+    mic = sr.Microphone()
+    print("[Echo] Fallback listener active...")
 
-def callback(indata, frames, time, status):
-    global last_audio
-    if status:
-        print(status)
-    last_audio = bytes(indata)
-    q.put(bytes(indata))
+    with mic as source:
+        r.adjust_for_ambient_noise(source, duration=2)
 
-def listen_forever():
-    print("Echo Hybrid Listening... 🎧")
-    with sd.RawInputStream(samplerate=16000, blocksize=8000, dtype='int16', channels=1, callback=callback):
-        while True:
-            data = q.get()
-            if recognizer.AcceptWaveform(data):
-                result = json.loads(recognizer.Result())
-                text = result.get("text", "")
-                if not text:
-                    continue
-                print(f"Heard (Vosk): {text}")
+    while True:
+        try:
+            with mic as source:
+                audio = r.listen(source, timeout=None, phrase_time_limit=6)
 
-                success = execute_command(text)
+            result = r.recognize_google(audio, show_all=True)
+            if not result or "alternative" not in result:
+                continue
 
-                if not success:
-                    print("Fallback to Whisper...")
-                    whisper_text = transcribe_audio(last_audio)
-                    if whisper_text:
-                        print(f"Heard (Whisper): {whisper_text}")
-                        execute_command(whisper_text)
-                    else:
-                        print("Whisper failed or empty result")
+            best_text = result["alternative"][0]["transcript"]
+            best_text = clean_text(best_text)
+
+            if any(word in best_text for word in EXIT_WORDS):
+                speak("Okay, exiting fallback listener.")
+                break
+
+            handled = route(best_text)
+            if handled:
+                speak(f"Executed: {best_text}")
+            else:
+                speak("I did not understand.")
+
+        except Exception as e:
+            print(f"[Fallback Listener error]: {e}")
+            time.sleep(1)
+            continue
