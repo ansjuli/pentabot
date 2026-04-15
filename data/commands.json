@@ -1,0 +1,109 @@
+{
+  "shutdown": {
+    "type": "system",
+    "target": "shutdown",
+    "required": ["shutdown"],
+    "optional": ["power"]
+  },
+  "restart": {
+    "type": "system",
+    "target": "restart",
+    "required": ["restart"],
+    "optional": ["reboot"]
+  },
+  "lock": {
+    "type": "system",
+    "target": "lock",
+    "required": ["lock"],
+    "optional": ["secure"]
+  },
+  "sleep": {
+    "type": "system",
+    "target": "sleep",
+    "required": ["sleep"],
+    "optional": []
+  },
+
+  "volume up": {
+    "type": "system",
+    "target": "volume_up",
+    "required": ["volume"],
+    "optional": ["up", "increase", "louder"]
+  },
+  "volume down": {
+    "type": "system",
+    "target": "volume_down",
+    "required": ["volume"],
+    "optional": ["down", "lower"]
+  },
+  "mute": {
+    "type": "system",
+    "target": "mute",
+    "required": ["mute"],
+    "optional": ["silence"]
+  },
+
+  "wifi on": {
+    "type": "system",
+    "target": "wifi_on",
+    "required": ["wifi"],
+    "optional": ["on", "enable"]
+  },
+  "wifi off": {
+    "type": "system",
+    "target": "wifi_off",
+    "required": ["wifi"],
+    "optional": ["off", "disable"]
+  },
+
+  "bluetooth on": {
+    "type": "system",
+    "target": "bluetooth_on",
+    "required": ["bluetooth"],
+    "optional": ["on"]
+  },
+  "bluetooth off": {
+    "type": "system",
+    "target": "bluetooth_off",
+    "required": ["bluetooth"],
+    "optional": ["off"]
+  },
+
+  "hotspot on": {
+    "type": "system",
+    "target": "hotspot_on",
+    "required": ["hotspot"],
+    "optional": ["on"]
+  },
+  "hotspot off": {
+    "type": "system",
+    "target": "hotspot_off",
+    "required": ["hotspot"],
+    "optional": ["off"]
+  },
+
+  "open videos": {
+    "type": "file",
+    "target": "videos",
+    "required": ["video", "videos"],
+    "optional": ["open", "watch"]
+  },
+  "play music": {
+    "type": "file",
+    "target": "music",
+    "required": ["music"],
+    "optional": ["play", "song"]
+  },
+  "open documents": {
+    "type": "file",
+    "target": "documents",
+    "required": ["document", "documents"],
+    "optional": ["open", "file"]
+  },
+  "open images": {
+    "type": "file",
+    "target": "images",
+    "required": ["image", "images"],
+    "optional": ["open", "photo", "picture"]
+  }
+}
