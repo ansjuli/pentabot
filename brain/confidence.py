@@ -1,12 +1,9 @@
-# brain/confidence.py
-
+import json
 from difflib import get_close_matches
 
-COMMAND_PATTERNS = {
-    "network_scan": ["scan network", "network scan"],
-    "process_check": ["check process", "show processes", "process list"],
-    "shutdown": ["exit", "stop", "quit"]
-}
+# Load commands from JSON
+with open("data/commands.json", "r") as f:
+    COMMAND_PATTERNS = json.load(f)
 
 
 def match_intent(text: str):

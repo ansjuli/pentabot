@@ -1,40 +1,72 @@
-# tools/command_executor.py
-
-import os
+import subprocess
 import sys
+import webbrowser
+import shutil
+
+from tools.nmap_tool import run_nmap_scan
 
 
 def execute(decision: dict):
     intent = decision.get("intent")
 
-    # 🔹 NETWORK SCAN (local info for now)
+    # =========================
+    # NETWORK SCAN (NMAP)
+    # =========================
     if intent == "network_scan":
-        print("[Pentabot] Running local network scan...")
 
-        command = "ipconfig" if os.name == "nt" else "ifconfig"
-        return os.system(command)
+        # 🔍 Pre-check dependency FIRST
+        if not shutil.which("nmap"):
+            return {
+                "status": "missing",
+                "tool": "nmap",
+                "message": "Nmap is not installed"
+            }
 
-    # 🔹 PROCESS CHECK
+        # ✅ Ready state (DO NOT say scanning here)
+        return {
+            "status": "ready",
+            "tool": "nmap",
+            "message": "Scanning network..."
+        }
+
+
+    # =========================
+    # INSTALL NMAP
+    # =========================
+    elif intent == "install_nmap":
+        webbrowser.open("https://nmap.org/download.html")
+        return {
+            "status": "action",
+            "tool": "nmap",
+            "message": "Opening Nmap download page"
+        }
+
+
+    # =========================
+    # PROCESS CHECK
+    # =========================
     elif intent == "process_check":
-        print("[Pentabot] Checking running processes...")
+        command = "tasklist" if sys.platform == "win32" else "ps aux"
+        result = subprocess.getoutput(command)
 
-        command = "tasklist" if os.name == "nt" else "ps aux"
-        return os.system(command)
+        return {
+            "status": "done",
+            "tool": "system",
+            "message": result
+        }
 
-    # 🔹 SHUTDOWN / EXIT
+
+    # =========================
+    # SHUTDOWN
+    # =========================
     elif intent == "shutdown":
-        print("[Pentabot] Shutting down...")
-        sys.exit()
+        return {
+            "status": "exit",
+            "message": "Shutting down"
+        }
 
-    # 🧠 UNCERTAIN INPUT (NEW v0.2)
-    elif intent == "uncertain":
-        score = decision.get("score", 0)
-        return f"[Pentabot] Not confident ({score:.2f}). Please repeat."
 
-    # ❓ UNKNOWN INTENT
-    elif intent == "unknown":
-        return "[Pentabot] Command not recognized."
-
-    # ⚠️ FALLBACK (safety)
-    else:
-        return "[Pentabot] No valid action found."
+    return {
+        "status": "unknown",
+        "message": "Command not recognized"
+    }

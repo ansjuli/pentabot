@@ -23,6 +23,9 @@ def route(text: str):
     if intent == "process_check":
         return {"intent": "process_check"}
 
+    if intent == "install_nmap":
+        return {"intent": "install_nmap"}
+
     if intent == "shutdown":
         return {"intent": "shutdown"}
 
